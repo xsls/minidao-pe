@@ -1,0 +1,171 @@
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on https://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" href="stylesheets/github-dark.css">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>Minidao-pe</title>
+  <meta name="description" content="Minidao-PE版，一款轻量级持久层解决方案，类Mybatis的SQL方式，可无缝集成Hibernate项目，解决Hibernate项目想支持类Mybatis功能问题。 ">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Minidao-pe</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">Minidao-PE版，一款轻量级持久层解决方案，类Mybatis的SQL方式，可无缝集成Hibernate项目，解决Hibernate项目想支持类Mybatis功能问题。 </p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/zhangdaiscott/minidao-pe/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/zhangdaiscott/minidao-pe/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/zhangdaiscott/minidao-pe" class="code">View Minidao-pe on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>
+<a id="minidao-pe精简版" class="anchor" href="#minidao-pe%E7%B2%BE%E7%AE%80%E7%89%88" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>MiniDao-PE精简版</h1>
+
+<p>MiniDao-PE 简介及特征</p>
+
+<p>MiniDao-PE 是一种持久化解决方案，类似mybatis的持久层解决方案，可以轻松集成入Hibernate工程，事务统一管理，解决了Hibernate工程想支类mybaits的功能问题。 具有以下特征:</p>
+
+<ul>
+<li>1.O/R mapping不用设置xml，零配置便于维护</li>
+<li>2.不需要了解JDBC的知识</li>
+<li>3.SQL语句和java代码的分离</li>
+<li>4.接口和实现分离，不用写持久层代码，用户只需写接口，以及某些接口方法对应的sql 它会通过AOP自动生成实现类</li>
+<li>5.支持自动事务处理和手动事务处理</li>
+<li>6.支持与hibernate轻量级无缝集成</li>
+<li>7.SQL支持脚本语言</li>
+</ul>
+
+<h3>
+<a id="接口和sql文件对应目录" class="anchor" href="#%E6%8E%A5%E5%8F%A3%E5%92%8Csql%E6%96%87%E4%BB%B6%E5%AF%B9%E5%BA%94%E7%9B%AE%E5%BD%95" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>接口和SQL文件对应目录</h3>
+
+<p><img src="http://www.jeecg.org/data/attachment/forum/201308/18/224051ey14ehqe000iegja.jpg" alt="github" title="minidao"></p>
+
+<h3>
+<a id="接口定义employeedaojava" class="anchor" href="#%E6%8E%A5%E5%8F%A3%E5%AE%9A%E4%B9%89employeedaojava" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>接口定义[EmployeeDao.java]</h3>
+
+<pre><code>@MiniDao
+public interface EmployeeDao {
+ @Arguments("employee")
+ public List&lt;Map&gt; getAllEmployees(Employee employee);
+
+ @Arguments("empno")
+ Employee getEmployee(String empno);
+
+ @Arguments({"empno","name"})
+ Map getMap(String empno,String name);
+
+ @Sql("SELECT count(*) FROM employee")
+ Integer getCount();
+
+ @Arguments("employee")
+ int update(Employee employee);
+
+ @Arguments("employee")
+ void insert(Employee employee);
+</code></pre>
+
+<p>}</p>
+
+<h3>
+<a id="sql文件employeedao_getallemployeessql" class="anchor" href="#sql%E6%96%87%E4%BB%B6employeedao_getallemployeessql" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SQL文件[EmployeeDao_getAllEmployees.sql]</h3>
+
+<pre><code>SELECT * FROM employee where 1=1 
+&lt;#if employee.age ?exists&gt;
+and age = :employee.age
+&lt;/#if&gt;
+&lt;#if employee.name ?exists&gt;
+and name = :employee.name
+&lt;/#if&gt;
+&lt;#if employee.empno ?exists&gt;
+and empno = :employee.empno
+&lt;/#if&gt;
+</code></pre>
+
+<h3>
+<a id="minidao接口配置" class="anchor" href="#minidao%E6%8E%A5%E5%8F%A3%E9%85%8D%E7%BD%AE" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>MiniDao接口配置</h3>
+
+<pre><code>    &lt;!-- 注册MiniDao接口 --&gt;
+&lt;bean class="org.jeecgframework.minidao.factory.MiniDaoBeanFactory"&gt;
+    &lt;property name="packagesToScan"&gt;
+        &lt;list&gt;
+            &lt;value&gt;examples.dao.*&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+
+<h3>
+<a id="测试代码" class="anchor" href="#%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>测试代码</h3>
+
+<pre><code>public class Client {
+public static void main(String args[]) {
+    BeanFactory factory = new ClassPathXmlApplicationContext(
+            "applicationContext.xml");
+
+    EmployeeDao employeeDao = (EmployeeDao) factory.getBean("employeeDao");
+    Employee employee = new Employee();
+    List&lt;Map&gt; list =  employeeDao.getAllEmployees(employee);
+    for(Map mp:list){
+        System.out.println(mp.get("id"));
+        System.out.println(mp.get("name"));
+        System.out.println(mp.get("empno"));
+        System.out.println(mp.get("age"));
+        System.out.println(mp.get("birthday"));
+        System.out.println(mp.get("salary"));
+    }
+}
+}
+</code></pre>
+
+<h2>
+<a id="技术交流" class="anchor" href="#%E6%8A%80%E6%9C%AF%E4%BA%A4%E6%B5%81" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>技术交流</h2>
+
+<ul>
+<li>作 者：  Jeecg团队</li>
+<li>论 坛： <a href="http://www.jeecg.org">www.jeecg.org</a>
+</li>
+<li>邮 箱：  <a href="mailto:jeecg@sina.com">jeecg@sina.com</a>
+</li>
+<li>QQ交流群：106838471</li>
+</ul>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/zhangdaiscott" class="avatar"><img src="https://avatars1.githubusercontent.com/u/3162115?v=3&amp;s=60" width="48" height="48"></a> <a href="https://github.com/zhangdaiscott">zhangdaiscott</a> maintains <a href="https://github.com/zhangdaiscott/minidao-pe">Minidao-pe</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/zhangdaiscott/minidao-pe/tarball/master" class="tar">tar</a><a href="https://github.com/zhangdaiscott/minidao-pe/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
+</html>
